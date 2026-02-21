@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gupta Ji Stock - Inventory Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#3b82f6', // blue-500
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="flex h-screen bg-gray-50 text-gray-800 overflow-hidden text-sm md:text-base">
+
+    <!-- Mobile Header -->
+    <div
+        class="md:hidden flex items-center justify-between bg-white px-4 py-3 border-b border-gray-200 z-50 absolute w-full top-0">
+        <div class="flex items-center gap-2 text-blue-600 font-bold text-xl">
+            <i class="fas fa-box-open text-2xl"></i>Gupta Ji Stock
+        </div>
+        <button id="mobileMenuBtn" class="text-gray-600 text-2xl focus:outline-none">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar"
+        class="bg-white w-64 border-r border-gray-200 flex flex-col justify-between fixed h-full z-40 transform -translate-x-full md:translate-x-0 md:static transition-transform duration-300 left-0 top-0 pt-16 md:pt-0">
+        <div>
+            <!-- Logo Section -->
+            <div
+                class="py-6 px-6 border-b border-gray-100 hidden md:flex items-center gap-3 text-blue-600 font-bold text-xl drop-shadow-sm">
+                <i class="fas fa-box-open text-3xl"></i>
+                Gupta Ji Stock
+            </div>
+
+            <!-- Navigation -->
+            <nav class="mt-6 space-y-2 px-3">
+                <button onclick="switchView('dashboardView', 'Dashboard (दुकान का हाल)', this)"
+                    class="nav-btn nav-item active-nav flex items-center w-full text-left py-3 px-4 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                    <i class="fas fa-table-cells-large w-8 text-lg text-center"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button onclick="switchView('productMasterView', 'Product Master (प्रोडक्ट मास्टर)', this)"
+                    class="nav-btn nav-item flex items-center w-full text-left py-3 px-4 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                    <i class="fas fa-box w-8 text-lg text-center"></i>
+                    <span>Product Master</span>
+                </button>
+                <button onclick="switchView('stockInView', 'Stock IN (माल की आवक)', this)"
+                    class="nav-btn nav-item flex items-center w-full text-left py-3 px-4 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                    <i class="fas fa-truck-field w-8 text-lg text-center"></i>
+                    <span>Stock IN</span>
+                </button>
+                <button onclick="switchView('stockOutView', 'Stock OUT (माल की निकासी)', this)"
+                    class="nav-btn nav-item flex items-center w-full text-left py-3 px-4 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                    <i class="fas fa-cart-shopping w-8 text-lg text-center"></i>
+                    <span>Stock OUT</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-gray-200 text-center text-xs text-gray-400">
+            v1.0.0
+        </div>
+    </aside>
+
+    <!-- Overlay mapping for mobile sidebar -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-gray-800 bg-opacity-50 z-30 hidden md:hidden"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full relative w-full pt-14 md:pt-0">
+
+        <!-- Header -->
+        <header
+            class="bg-white px-6 md:px-8 py-5 flex justify-between items-center border-b border-gray-200 shadow-sm z-10 sticky top-0">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800" id="currentViewTitle">Dashboard (दुकान का हाल)</h1>
+            <button onclick="downloadBackup()"
+                class="flex items-center gap-2 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 font-medium px-4 py-2 md:py-2.5 rounded shadow-sm hover:shadow hover:bg-gray-50 transition-all text-sm">
+                <i class="fas fa-download"></i> <span class="hidden md:inline">Download Backup</span>
+            </button>
+        </header>
+
+        <!-- Scrollable Content Container -->
+        <div class="p-4 md:p-8 overflow-y-auto flex-1 w-full bg-[#f8f9fc]">
+            <div class="max-w-7xl mx-auto w-full">
+
+                <!-- ==================== DASHBOARD VIEW ==================== -->
+                <div id="dashboardView" class="view-section space-y-6">
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Total Products -->
+                        <div
+                            class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between transition-transform hover:-translate-y-1">
+                            <div>
+                                <p class="text-gray-500 text-sm font-medium mb-1">Total Products</p>
+                                <p class="text-3xl font-bold text-gray-800 leading-none" id="statTotalProducts">0</p>
+                            </div>
+                            <div
+                                class="bg-blue-50 w-14 h-14 rounded-xl flex items-center justify-center text-blue-600 border border-blue-100">
+                                <i class="fas fa-box-open text-2xl"></i>
+                            </div>
+                        </div>
+
+                        <!-- Total Stock Value -->
+                        <div
+                            class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between transition-transform hover:-translate-y-1">
+                            <div>
+                                <p class="text-gray-500 text-sm font-medium mb-1">Total Stock Value</p>
+                                <p class="text-3xl font-bold text-green-600 leading-none" id="statTotalValue">₹0</p>
+                            </div>
+                            <div
+                                class="bg-green-50 w-14 h-14 rounded-xl flex items-center justify-center text-green-600 border border-green-100">
+                                <i class="fas fa-arrow-trend-up text-2xl"></i>
+                            </div>
+                        </div>
+
+                        <!-- Low Stock Alerts (Stats) -->
+                        <div
+                            class="bg-red-50 p-6 rounded-2xl shadow-sm border border-red-100 flex items-center justify-between transition-transform hover:-translate-y-1">
+                            <div>
+                                <p class="text-red-500 text-sm font-medium mb-1">Low Stock Alerts</p>
+                                <p class="text-3xl font-bold text-red-600 leading-none" id="statAlerts">0</p>
+                            </div>
+                            <div
+                                class="bg-red-100 w-14 h-14 rounded-full flex items-center justify-center text-red-600">
+                                <i class="fas fa-circle-exclamation text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Low Stock Alerts Container -->
+                    <div id="lowStockAlertContainer" class="hidden">
+                        <div class="bg-red-50/60 border border-red-200 rounded-2xl p-6 shadow-sm">
+                            <h3 class="text-red-600 font-bold text-lg mb-5 flex items-center gap-2">
+                                <i class="fas fa-circle-exclamation text-xl"></i> Alert: Stock is Low! Order Now! (तुरंत
+                                ऑर्डर करें)
+                            </h3>
+
+                            <div id="lowStockCards"
+                                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                <!-- Dynamically injected low stock elements -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Section -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold mb-6 text-gray-800">Stock Overview</h3>
+                        <div class="relative w-full" style="height: 350px;">
+                            <canvas id="stockChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== PRODUCT MASTER VIEW ==================== -->
+                <div id="productMasterView" class="view-section hidden-view space-y-6">
+
+                    <!-- Product Form -->
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold mb-6 text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-plus-circle text-blue-600"></i> <span id="productFormTitle">Add New
+                                Product</span>
+                        </h3>
+
+                        <form id="productForm" onsubmit="handleProductSubmit(event)">
+                            <input type="hidden" id="editProductId" value="">
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Product Name <span
+                                            class="text-red-500">*</span></label>
+                                    <input type="text" id="p_name" required
+                                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm"
+                                        placeholder="e.g. Lux Soap">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Price (₹) <span
+                                            class="text-red-500">*</span></label>
+                                    <input type="number" id="p_price" step="0.01" min="0" required
+                                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm"
+                                        placeholder="0.00">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Initial Stock <span
+                                            class="text-red-500">*</span></label>
+                                    <input type="number" id="p_stock" min="0" required
+                                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm"
+                                        placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Low Stock Limit <span
+                                            class="text-red-500">*</span></label>
+                                    <input type="number" id="p_limit" min="0" required
+                                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm"
+                                        placeholder="e.g. 5">
+                                </div>
+                            </div>
+
+                            <div class="mt-6 flex gap-3 justify-end border-t border-gray-100 pt-6">
+                                <button type="button" id="cancelEditBtn" onclick="resetProductForm()"
+                                    class="hidden px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-all shadow-sm">
+                                    Cancel
+                                </button>
+                                <button type="submit" id="productSubmitBtn"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-all shadow font-medium flex items-center gap-2">
+                                    <i class="fas fa-save"></i> <span>Save Product</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Product Table -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                            <h3 class="text-gray-800 font-bold">Inventory List</h3>
+                        </div>
+                        <div class="overflow-x-auto w-full">
+                            <table class="w-full text-left border-collapse min-w-[700px]">
+                                <thead>
+                                    <tr class="bg-white text-gray-500 text-sm border-b border-gray-200">
+                                        <th class="py-4 px-6 font-semibold w-20">S.No</th>
+                                        <th class="py-4 px-6 font-semibold">Product Name</th>
+                                        <th class="py-4 px-6 font-semibold">Price (₹)</th>
+                                        <th class="py-4 px-6 font-semibold">Current Stock</th>
+                                        <th class="py-4 px-6 font-semibold">Limit</th>
+                                        <th class="py-4 px-6 font-semibold text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productTableBody" class="divide-y divide-gray-100 text-sm md:text-base">
+                                    <!-- Table Rows injected logically -->
+                                </tbody>
+                            </table>
+                            <div id="emptyTableMsg"
+                                class="hidden text-center py-10 text-gray-500 w-full flex flex-col items-center">
+                                <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
+                                <p>No products found. Add your first product above to get started.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== STOCK IN VIEW ==================== -->
+                <div id="stockInView" class="view-section hidden-view">
+                    <div class="flex items-center gap-4 mb-6 text-green-700">
+                        <i class="fas fa-truck-ramp-box text-2xl"></i>
+                        <h3 class="text-xl font-bold">Stock IN (माल की आवक)</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Left side: Form -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <h4 class="text-base text-gray-700 mb-6 font-medium">Add New Stock</h4>
+                            <form onsubmit="handleStockTransaction(event, 'in')">
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="block text-sm text-gray-600 mb-2">Select Product (सामान
+                                            चुनें)</label>
+                                        <div class="relative">
+                                            <select id="in_product" required
+                                                class="w-full border border-gray-200 rounded-lg pl-4 pr-10 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none appearance-none bg-white shadow-sm transition-all"
+                                                onchange="updateExampleLogic('in')">
+                                                <option value="">-- Choose Product --</option>
+                                            </select>
+                                            <div
+                                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
+                                                <i class="fas fa-chevron-down text-xs"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-gray-600 mb-2">Quantity Received
+                                            (मात्रा)</label>
+                                        <input type="number" id="in_qty" min="1" required
+                                            class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none shadow-sm transition-all"
+                                            placeholder="e.g. 50" oninput="updateExampleLogic('in')">
+                                    </div>
+                                    <button type="submit"
+                                        class="w-full bg-[#d1d5db] text-white px-6 py-3 rounded-lg transition-all shadow-sm mt-2 font-medium flex justify-center items-center gap-2"
+                                        id="in_submit_btn" disabled>
+                                        <i class="fas fa-cube"></i> Add to Stock
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Right side: Info Card -->
+                        <div
+                            class="bg-[#f0fdf4] p-6 rounded-2xl shadow-sm border border-green-100 flex flex-col justify-between">
+                            <div class="text-center mb-6">
+                                <div
+                                    class="bg-white w-16 h-16 mx-auto rounded-full flex items-center justify-center text-green-600 shadow-sm mb-4">
+                                    <i class="fas fa-truck text-2xl"></i>
+                                </div>
+                                <h4 class="text-green-800 font-bold mb-2">Supplier Delivery?</h4>
+                                <p class="text-green-600 text-sm">Use this form when new inventory arrives at the shop.
+                                    The system will automatically update the total stock count.</p>
+                            </div>
+
+                            <div class="bg-white rounded-xl border border-green-100 p-4 shadow-sm text-sm">
+                                <div class="text-gray-500 text-xs font-bold mb-3 tracking-wider">EXAMPLE LOGIC</div>
+                                <div class="flex justify-between items-center mb-1 text-gray-500">
+                                    <span>Old Stock:</span>
+                                    <span class="font-bold text-gray-800" id="in_old_stock">0</span>
+                                </div>
+                                <div
+                                    class="flex justify-between items-center mb-3 text-gray-500 pb-3 border-b border-gray-100 relative">
+                                    <span
+                                        class="pl-2 relative before:content-['+'] before:absolute before:-left-1 before:top-0 before:text-green-500">New
+                                        Stock:</span>
+                                    <span class="font-bold text-green-600" id="in_new_stock">0</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-gray-800">Total:</span>
+                                    <span class="font-bold text-gray-800" id="in_total_stock">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== STOCK OUT VIEW ==================== -->
+                <div id="stockOutView" class="view-section hidden-view">
+                    <div class="flex items-center gap-4 mb-6 text-blue-600">
+                        <i class="fas fa-cart-shopping text-2xl"></i>
+                        <h3 class="text-xl font-bold">Stock OUT (बिक्री / निकासी)</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Left side: Form -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <h4 class="text-base text-gray-700 mb-6 font-medium">Record Sale</h4>
+                            <form onsubmit="handleStockTransaction(event, 'out')">
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="block text-sm text-gray-600 mb-2">Select Product (सामान
+                                            चुनें)</label>
+                                        <div class="relative">
+                                            <select id="out_product" required
+                                                class="w-full border border-gray-200 rounded-lg pl-4 pr-10 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none bg-white shadow-sm transition-all"
+                                                onchange="updateExampleLogic('out')">
+                                                <option value="">-- Choose Product --</option>
+                                            </select>
+                                            <div
+                                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
+                                                <i class="fas fa-chevron-down text-xs"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-gray-600 mb-2">Quantity Sold (मात्रा)</label>
+                                        <input type="number" id="out_qty" min="1" required
+                                            class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all"
+                                            placeholder="e.g. 5" oninput="updateExampleLogic('out')">
+                                    </div>
+                                    <button type="submit"
+                                        class="w-full bg-[#d1d5db] text-white px-6 py-3 rounded-lg transition-all shadow-sm mt-2 font-medium flex justify-center items-center gap-2"
+                                        id="out_submit_btn" disabled>
+                                        <i class="fas fa-cube"></i> Complete Sale
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Right side: Info Card -->
+                        <div
+                            class="bg-[#eff6ff] p-6 rounded-2xl shadow-sm border border-blue-100 flex flex-col justify-between">
+                            <div class="text-center mb-6">
+                                <div
+                                    class="bg-white w-16 h-16 mx-auto rounded-full flex items-center justify-center text-blue-600 shadow-sm mb-4">
+                                    <i class="fas fa-calculator text-2xl"></i>
+                                </div>
+                                <h4 class="text-blue-900 font-bold mb-2">Customer Purchase?</h4>
+                                <p class="text-blue-600 text-sm">Record sales here to deduct from inventory. The system
+                                    calculates the remaining stock automatically.</p>
+                            </div>
+
+                            <div class="bg-white rounded-xl border border-blue-100 p-4 shadow-sm text-sm">
+                                <div class="text-gray-500 text-xs font-bold mb-3 tracking-wider">EXAMPLE LOGIC</div>
+                                <div class="flex justify-between items-center mb-1 text-gray-500">
+                                    <span>Total Stock:</span>
+                                    <span class="font-bold text-gray-800" id="out_old_stock">0</span>
+                                </div>
+                                <div
+                                    class="flex justify-between items-center mb-3 text-gray-500 pb-3 border-b border-gray-100 relative">
+                                    <span
+                                        class="pl-2 relative before:content-['-'] before:absolute before:-left-1 before:top-0 before:text-red-500">Sold:</span>
+                                    <span class="font-bold text-red-600" id="out_new_stock">0</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-gray-800">Remaining:</span>
+                                    <span class="font-bold text-gray-800" id="out_total_stock">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- UI Toast Notification -->
+    <div id="toast"
+        class="fixed bottom-6 md:bottom-10 right-1/2 md:right-10 transform translate-x-1/2 md:translate-x-0 translate-y-24 opacity-0 transition-all duration-300 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50 whitespace-nowrap border border-gray-700">
+        <i class="fas fa-check-circle text-green-400 text-lg"></i>
+        <span id="toastMsg" class="font-medium">Action completed successfully.</span>
+    </div>
+
+    <!-- MAIN JAVASCRIPT APP LOGIC -->
+    <script src="script.js"></script>
+</body>
+
+</html>
