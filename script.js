@@ -415,3 +415,25 @@ function handleStockTransaction(e, type) {
     updateDropdowns(); // immediate refresh
     updateExampleLogic(type); // Reset example logic after save
 }
+
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDHVLNg9Lj5Zou7pBg49qBiMichKZMum04",
+  authDomain: "stock-simple-inventory.firebaseapp.com",
+  projectId: "stock-simple-inventory",
+  storageBucket: "stock-simple-inventory.firebasestorage.app",
+  messagingSenderId: "752140590670",
+  appId: "1:752140590670:web:c52e000c9e6854b3e6ed1f",
+  measurementId: "G-H9K3TKJKHF"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
