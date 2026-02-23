@@ -415,3 +415,4 @@ function handleStockTransaction(e, type) {
     updateDropdowns(); // immediate refresh
     updateExampleLogic(type); // Reset example logic after save
 }
+

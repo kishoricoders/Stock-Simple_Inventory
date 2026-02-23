@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gupta Ji Stock - Inventory Management</title>
+    <title>Inventory Management</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -37,7 +37,7 @@
     <div
         class="md:hidden flex items-center justify-between bg-white px-4 py-3 border-b border-gray-200 z-50 absolute w-full top-0">
         <div class="flex items-center gap-2 text-blue-600 font-bold text-xl">
-            <i class="fas fa-box-open text-2xl"></i>Gupta Ji Stock
+            <i class="fas fa-cube text-2xl"></i>Gupta Ji Stock
         </div>
         <button id="mobileMenuBtn" class="text-gray-600 text-2xl focus:outline-none">
             <i class="fas fa-bars"></i>
@@ -51,7 +51,7 @@
             <!-- Logo Section -->
             <div
                 class="py-6 px-6 border-b border-gray-100 hidden md:flex items-center gap-3 text-blue-600 font-bold text-xl drop-shadow-sm">
-                <i class="fas fa-box-open text-3xl"></i>
+                <i class="fas fa-cube text-3xl"></i>
                 Gupta Ji Stock
             </div>
 
@@ -80,8 +80,20 @@
             </nav>
         </div>
 
-        <div class="p-4 border-t border-gray-200 text-center text-xs text-gray-400">
-            v1.0.0
+        <div class="px-6 py-4 border-t border-gray-200 flex flex-col gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                    <i class="fas fa-user text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-800">Gupta Ji</p>
+                    <p class="text-xs text-gray-500">@username</p>
+                </div>
+            </div>
+            <a href="#" id="logoutBtn"
+                class="flex items-center gap-2 text-red-600 font-bold hover:text-red-700 transition-colors text-sm">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
         </div>
     </aside>
 
@@ -95,10 +107,12 @@
         <header
             class="bg-white px-6 md:px-8 py-5 flex justify-between items-center border-b border-gray-200 shadow-sm z-10 sticky top-0">
             <h1 class="text-xl md:text-2xl font-bold text-gray-800" id="currentViewTitle">Dashboard (दुकान का हाल)</h1>
-            <button onclick="downloadBackup()"
-                class="flex items-center gap-2 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 font-medium px-4 py-2 md:py-2.5 rounded shadow-sm hover:shadow hover:bg-gray-50 transition-all text-sm">
-                <i class="fas fa-download"></i> <span class="hidden md:inline">Download Backup</span>
-            </button>
+            <div class="flex items-center gap-3">
+                <button onclick="downloadBackup()"
+                    class="flex items-center gap-2 bg-gray-50 border border-gray-200 hover:border-gray-300 text-gray-700 font-medium px-4 py-2 md:py-2.5 rounded shadow-sm hover:shadow hover:bg-gray-100 transition-all text-sm">
+                    <i class="fas fa-download"></i> <span class="hidden md:inline">Download Backup</span>
+                </button>
+            </div>
         </header>
 
         <!-- Scrollable Content Container -->
@@ -119,7 +133,7 @@
                             </div>
                             <div
                                 class="bg-blue-50 w-14 h-14 rounded-xl flex items-center justify-center text-blue-600 border border-blue-100">
-                                <i class="fas fa-box-open text-2xl"></i>
+                                <i class="fas fa-cube text-2xl"></i>
                             </div>
                         </div>
 
@@ -416,8 +430,13 @@
                         </div>
                     </div>
                 </div>
-
             </div>
+
+            <!-- Footer -->
+            <footer class="mt-8 pt-6 pb-2 border-t border-gray-200 text-center text-sm text-gray-500">
+                &copy;
+                <?php echo date("Y"); ?> Gupta Ji Stock. All rights reserved.
+            </footer>
         </div>
     </main>
 
