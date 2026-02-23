@@ -416,24 +416,50 @@ function handleStockTransaction(e, type) {
     updateExampleLogic(type); // Reset example logic after save
 }
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyC2rDfEe-wSI6riWcTIMzmytENOOaGly90",
-  authDomain: "stock-inventory-manageme-f96ed.firebaseapp.com",
-  projectId: "stock-inventory-manageme-f96ed",
-  storageBucket: "stock-inventory-manageme-f96ed.firebasestorage.app",
-  messagingSenderId: "105634580538",
-  appId: "1:105634580538:web:60df7266960fbb38834d03",
-  measurementId: "G-SEB0FMLBBS"
-};
+        // 1. Firebase के सही अस्त्र मंगाना (CDN Links)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+        // 2. तुम्हारी असली 'Firebase Config' चाबियां
+        const firebaseConfig = {
+            apiKey: "AIzaSyC2rDfEe-wSI6riWcTIMzmytENOOaGly90",
+            authDomain: "stock-inventory-manageme-f96ed.firebaseapp.com",
+            projectId: "stock-inventory-manageme-f96ed",
+            storageBucket: "stock-inventory-manageme-f96ed.firebasestorage.app",
+            messagingSenderId: "105634580538",
+            appId: "1:105634580538:web:60df7266960fbb38834d03",
+            measurementId: "G-SEB0FMLBBS"
+        };
+
+        // 3. गूगल के सेनापति को जगाना
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // 4. लॉगिन फॉर्म का नियंत्रण
+        const loginForm = document.getElementById('loginForm');
+        
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // पेज को रिफ्रेश होने से रोकना
+            
+            // फॉर्म से ईमेल और पासवर्ड खींचना
+            const email = document.getElementsByName('username')[0].value; 
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Firebase के द्वारपाल पर प्रहार
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // विजय! पासवर्ड सही है।
+                    alert("लॉगिन सफल! स्वागत है।");
+                    window.location.href = "index.html"; // डैशबोर्ड का द्वार खोल दो
+                })
+                .catch((error) => {
+                    // हार! पासवर्ड या ईमेल गलत है।
+                    alert("त्रुटि (Error): " + error.message);
+                    
+                    // लोडिंग बटन को वापस ठीक करना
+                    submitBtn.innerHTML = '<span>Login Securely</span> <i class="fas fa-arrow-right"></i>';
+                    submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+                });
+        });
